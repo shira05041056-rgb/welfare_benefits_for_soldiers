@@ -62,3 +62,8 @@ async function updateBenefit(soldierId, benefit) {
 
 
 
+export{
+    createBenefit,
+    getBenifitBySoldierId,
+    updateBenefit
+}
