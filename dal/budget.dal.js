@@ -16,13 +16,14 @@ async function createBudget(budget) {
 
 async function getAllBudget() {
     const { data, error } = await client.from("budget").select("*");
+    
     for (const budget of data) {
         let spentAmount = (await client.from("exploitation").select("amount").eq("budgetid", budget.id)).data;
         if (spentAmount.length > 0) {
-            spentAmount = spentAmount.reduce((curr, ecc) => {
-                return curr + ecc;
+            spentAmount = (spentAmount.reduce((curr, ecc) => {
+                return curr.amount + ecc.amount;
 
-            });
+            })).amount;
         } else { spentAmount = 0; }
         budget.spentAmount = spentAmount
         budget.remainingAmount = budget.allocatedAmount - spentAmount
@@ -39,12 +40,20 @@ async function getTransactionByBudgetId(budgetId) {
 
 
 async function createTransaction(budgetId, transaction) {
-    const { data, error } = await client.from("budget").insert({
-        budgetId: budgetId,
+    const { data, error } = await client.from("exploitation").insert({
+        budgetid: budgetId,
         amount: transaction.amount,
         reason: transaction.reason || null
     },).select();
     if (error) return error;
     return data;
 
+}
+
+
+export {
+    createBudget,
+    getAllBudget,
+    getTransactionByBudgetId,
+    createTransaction
 }
